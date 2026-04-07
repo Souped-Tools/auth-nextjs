@@ -1,0 +1,40 @@
+{
+  "name": "@souped/auth-nextjs",
+  "version": "0.1.0",
+  "description": "Souped OAuth integration for Next.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./handlers": {
+      "types": "./dist/handlers.d.ts",
+      "default": "./dist/handlers.js"
+    },
+    "./proxy": {
+      "types": "./dist/proxy.d.ts",
+      "default": "./dist/proxy.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "next": ">=15.0.0"
+  },
+  "dependencies": {
+    "jose": "^6.0.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "next": "16.2.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
+  },
+  "license": "MIT"
+}
