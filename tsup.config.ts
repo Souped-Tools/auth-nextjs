@@ -6,6 +6,7 @@ export default defineConfig({
     "src/handlers.ts",
     "src/proxy.ts",
     "src/client.ts",
+    "src/server.ts",
   ],
   format: ["esm"],
   dts: true,

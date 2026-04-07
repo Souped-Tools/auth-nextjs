@@ -4,6 +4,7 @@ export interface SoupedConfig {
   clientId: string
   clientSecret: string
   soupedUrl: string
+  appId: string
 }
 
 export interface SoupedClaims {
@@ -25,14 +26,15 @@ export function getConfig(): SoupedConfig {
   const clientId = process.env.SOUPED_CLIENT_ID
   const clientSecret = process.env.SOUPED_CLIENT_SECRET
   const soupedUrl = process.env.SOUPED_URL
+  const appId = process.env.SOUPED_APP_ID
 
-  if (!clientId || !clientSecret || !soupedUrl) {
+  if (!clientId || !clientSecret || !soupedUrl || !appId) {
     throw new Error(
-      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, and SOUPED_URL."
+      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, SOUPED_URL, and SOUPED_APP_ID."
     )
   }
 
-  cachedConfig = { clientId, clientSecret, soupedUrl }
+  cachedConfig = { clientId, clientSecret, soupedUrl, appId }
   return cachedConfig
 }
 
@@ -124,6 +126,38 @@ export async function exchangeCode(
   if (!res.ok) {
     const text = await res.text()
     throw new Error(`Souped token exchange failed: ${res.status} ${text}`)
+  }
+
+  return res.json()
+}
+
+// --- Token refresh ---
+
+export async function refreshAccessToken(
+  config: SoupedConfig,
+  refreshToken: string
+): Promise<{
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+}> {
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    client_id: config.clientId,
+    client_secret: config.clientSecret,
+  })
+
+  const res = await fetch(`${config.soupedUrl}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Souped token refresh failed: ${res.status} ${text}`)
   }
 
   return res.json()
