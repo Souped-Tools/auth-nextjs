@@ -11,7 +11,7 @@ type ProxyHandler = (
  *
  * ```ts
  * // src/proxy.ts
- * export { proxy } from "@souped/auth-nextjs/proxy"
+ * export { proxy } from "@souped-tools/auth-nextjs/proxy"
  * export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"] }
  * ```
  */
@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
  *
  * ```ts
  * // src/proxy.ts (Next.js 16+)
- * import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+ * import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
  *
  * export const proxy = withSoupedAuth((request) => {
  *   // your custom logic here
@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
  *
  * ```ts
  * // middleware.ts (Next.js 15)
- * import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+ * import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
  *
  * export const middleware = withSoupedAuth((request) => {
  *   return NextResponse.next()

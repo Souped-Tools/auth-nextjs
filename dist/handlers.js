@@ -4,7 +4,7 @@ import {
   generateState,
   getAuthorizeUrl,
   getConfig
-} from "./chunk-7NTWS23R.js";
+} from "./chunk-DIZYQRF2.js";
 
 // src/handlers.ts
 import { cookies } from "next/headers";

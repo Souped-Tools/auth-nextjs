@@ -8,7 +8,7 @@ function getConfig() {
   const soupedUrl = process.env.SOUPED_URL;
   if (!clientId || !clientSecret || !soupedUrl) {
     throw new Error(
-      "@souped/nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, and SOUPED_URL."
+      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, and SOUPED_URL."
     );
   }
   cachedConfig = { clientId, clientSecret, soupedUrl };

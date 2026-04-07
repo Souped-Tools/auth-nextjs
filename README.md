@@ -1,4 +1,4 @@
-# @souped/auth-nextjs
+# @souped-tools/auth-nextjs
 
 Souped OAuth integration for Next.js. Adds authentication to your app in minutes.
 
@@ -21,7 +21,7 @@ http://localhost:3000/api/auth/callback
 ### 2. Install
 
 ```bash
-npm install @souped/auth-nextjs
+npm install @souped-tools/auth-nextjs
 ```
 
 ### 3. Environment variables
@@ -40,7 +40,7 @@ Create a catch-all route handler:
 
 ```ts
 // src/app/api/auth/[...souped]/route.ts
-export { GET } from "@souped/auth-nextjs/handlers"
+export { GET } from "@souped-tools/auth-nextjs/handlers"
 ```
 
 This creates three routes automatically:
@@ -54,7 +54,7 @@ This creates three routes automatically:
 
 ```ts
 // src/proxy.ts (Next.js 16+) or middleware.ts (Next.js 15)
-export { proxy } from "@souped/auth-nextjs/proxy"
+export { proxy } from "@souped-tools/auth-nextjs/proxy"
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
@@ -65,7 +65,7 @@ export const config = {
 
 ```ts
 // src/proxy.ts (Next.js 16+)
-import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
 import { NextResponse } from "next/server"
 
 export const proxy = withSoupedAuth((request) => {
@@ -80,7 +80,7 @@ export const config = {
 
 ```ts
 // middleware.ts (Next.js 15)
-import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
 import { NextResponse } from "next/server"
 
 export const middleware = withSoupedAuth((request) => {
@@ -102,7 +102,7 @@ That's it. Your app is now protected. Unauthenticated users are redirected to So
 ### Server components
 
 ```ts
-import { getSession } from "@souped/auth-nextjs"
+import { getSession } from "@souped-tools/auth-nextjs"
 
 export default async function Page() {
   const user = await getSession()
@@ -117,8 +117,8 @@ Wrap your app with the provider (in a server component):
 
 ```tsx
 // src/app/layout.tsx
-import { getSession } from "@souped/auth-nextjs"
-import { SoupedProvider } from "@souped/auth-nextjs/client"
+import { getSession } from "@souped-tools/auth-nextjs"
+import { SoupedProvider } from "@souped-tools/auth-nextjs/client"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
@@ -138,7 +138,7 @@ Then use the hook in any client component:
 
 ```tsx
 "use client"
-import { useSession } from "@souped/auth-nextjs/client"
+import { useSession } from "@souped-tools/auth-nextjs/client"
 
 export function UserGreeting() {
   const user = useSession()
@@ -151,7 +151,7 @@ export function UserGreeting() {
 
 ## API reference
 
-### `@souped/auth-nextjs`
+### `@souped-tools/auth-nextjs`
 
 | Export | Description |
 |---|---|
@@ -159,13 +159,13 @@ export function UserGreeting() {
 | `SoupedClaims` | TypeScript type for the JWT claims |
 | `SoupedConfig` | TypeScript type for the config object |
 
-### `@souped/auth-nextjs/handlers`
+### `@souped-tools/auth-nextjs/handlers`
 
 | Export | Description |
 |---|---|
 | `GET` | Route handler for `/api/auth/[...souped]` |
 
-### `@souped/auth-nextjs/proxy`
+### `@souped-tools/auth-nextjs/proxy`
 
 | Export | Description |
 |---|---|
@@ -173,7 +173,7 @@ export function UserGreeting() {
 | `withSoupedAuth(handler)` | Wrapper — composes Souped auth with your existing proxy/middleware logic |
 | `config` | Default matcher config |
 
-### `@souped/auth-nextjs/client`
+### `@souped-tools/auth-nextjs/client`
 
 | Export | Description |
 |---|---|

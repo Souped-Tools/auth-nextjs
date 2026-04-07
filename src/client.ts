@@ -13,8 +13,8 @@ const SoupedContext = createContext<SoupedUser | null>(null)
  *
  * In your layout.tsx (server component):
  * ```tsx
- * import { getSession } from "@souped/auth-nextjs"
- * import { SoupedProvider } from "@souped/auth-nextjs/client"
+ * import { getSession } from "@souped-tools/auth-nextjs"
+ * import { SoupedProvider } from "@souped-tools/auth-nextjs/client"
  *
  * export default async function Layout({ children }) {
  *   const session = await getSession()
@@ -38,7 +38,7 @@ export function SoupedProvider({
  *
  * ```tsx
  * "use client"
- * import { useSession } from "@souped/auth-nextjs/client"
+ * import { useSession } from "@souped-tools/auth-nextjs/client"
  *
  * export function UserGreeting() {
  *   const user = useSession()

@@ -6,7 +6,7 @@ type ProxyHandler = (request: NextRequest) => Response | NextResponse | Promise<
  *
  * ```ts
  * // src/proxy.ts
- * export { proxy } from "@souped/auth-nextjs/proxy"
+ * export { proxy } from "@souped-tools/auth-nextjs/proxy"
  * export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"] }
  * ```
  */
@@ -16,7 +16,7 @@ declare function proxy(request: NextRequest): Promise<NextResponse<unknown>>;
  *
  * ```ts
  * // src/proxy.ts (Next.js 16+)
- * import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+ * import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
  *
  * export const proxy = withSoupedAuth((request) => {
  *   // your custom logic here
@@ -26,7 +26,7 @@ declare function proxy(request: NextRequest): Promise<NextResponse<unknown>>;
  *
  * ```ts
  * // middleware.ts (Next.js 15)
- * import { withSoupedAuth } from "@souped/auth-nextjs/proxy"
+ * import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
  *
  * export const middleware = withSoupedAuth((request) => {
  *   return NextResponse.next()

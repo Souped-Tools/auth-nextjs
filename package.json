@@ -1,5 +1,5 @@
 {
-  "name": "@souped/auth-nextjs",
+  "name": "@souped-tools/auth-nextjs",
   "version": "0.1.0",
   "description": "Souped OAuth integration for Next.js",
   "type": "module",
