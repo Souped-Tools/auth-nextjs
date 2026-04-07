@@ -15,6 +15,10 @@
     "./proxy": {
       "types": "./dist/proxy.d.ts",
       "default": "./dist/proxy.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
     }
   },
   "files": [
@@ -25,13 +29,15 @@
     "dev": "tsup --watch"
   },
   "peerDependencies": {
-    "next": ">=15.0.0"
+    "next": ">=15.0.0",
+    "react": ">=18.0.0"
   },
   "dependencies": {
     "jose": "^6.0.11"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/react": "^19.2.14",
     "next": "16.2.2",
     "tsup": "^8.4.0",
     "typescript": "^5"
