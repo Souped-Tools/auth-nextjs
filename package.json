@@ -1,8 +1,16 @@
 {
   "name": "@souped-tools/auth-nextjs",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Souped OAuth integration for Next.js",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Souped-Tools/auth-nextjs.git"
+  },
+  "homepage": "https://github.com/Souped-Tools/auth-nextjs#readme",
+  "bugs": {
+    "url": "https://github.com/Souped-Tools/auth-nextjs/issues"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
