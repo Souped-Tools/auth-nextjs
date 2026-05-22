@@ -19,8 +19,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
+
+      # Trusted Publishing OIDC requires npm >= 11.5.1.
+      # Node 22 ships with npm 10.x, which uses the legacy token flow and
+      # fails OIDC token exchange with a misleading "E404 not in this
+      # registry" error on scoped packages.
+      - name: Upgrade npm to latest (for OIDC trusted publishing)
+        run: npm install -g npm@latest
 
       - name: Check if version changed
         id: check
