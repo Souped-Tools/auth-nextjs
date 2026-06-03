@@ -29,13 +29,15 @@ npm install @souped-tools/auth-nextjs
 Create a `.env.local` file:
 
 ```env
-SOUPED_CLIENT_ID=souped_client_xxx
-SOUPED_CLIENT_SECRET=souped_secret_xxx
-# Souped project ID (UUID) — shown in the dashboard next to your Web App.
-SOUPED_APP_ID=<your-project-uuid>
-# Glaze auth API URL — NOT the marketing site or dashboard.
-# Prod: https://glaze.souped.app  |  Dev: https://glaze.dev.souped.app
-SOUPED_URL=https://glaze.souped.app
+# OAuth client credentials from your Web App in the Souped dashboard.
+SOUPED_CLIENT_ID=
+SOUPED_CLIENT_SECRET=
+# Souped project ID (UUID), shown in the dashboard next to your Web App.
+SOUPED_APP_ID=
+# Glaze auth API URL — NOT the marketing site or dashboard. The exact
+# value depends on the environment your Souped project lives in; get it
+# from `glaze_get_project_auth_setup` over MCP, or from the dashboard.
+SOUPED_URL=
 ```
 
 All four variables are required. The SDK throws at startup if any is missing.
