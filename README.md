@@ -6,7 +6,7 @@ Souped OAuth integration for Next.js. Adds authentication to your app in minutes
 
 ### 1. Create a Web App in Souped
 
-Go to the [Souped dashboard](https://souped.tools), create a Web App, and copy your credentials.
+Go to the [Souped dashboard](https://build.souped.app), create a Web App, and copy your credentials.
 
 Set your allowed redirect URI to:
 ```
@@ -29,10 +29,18 @@ npm install @souped-tools/auth-nextjs
 Create a `.env.local` file:
 
 ```env
-SOUPED_CLIENT_ID=souped_client_xxx
-SOUPED_CLIENT_SECRET=souped_secret_xxx
-SOUPED_URL=https://souped.tools
+# OAuth client credentials from your Web App in the Souped dashboard.
+SOUPED_CLIENT_ID=
+SOUPED_CLIENT_SECRET=
+# Souped project ID (UUID), shown in the dashboard next to your Web App.
+SOUPED_APP_ID=
+# Glaze auth API URL — NOT the marketing site or dashboard. The exact
+# value depends on the environment your Souped project lives in; get it
+# from `glaze_get_project_auth_setup` over MCP, or from the dashboard.
+SOUPED_URL=
 ```
+
+All four variables are required. The SDK throws at startup if any is missing.
 
 ### 4. Add the auth routes
 
