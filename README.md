@@ -214,6 +214,18 @@ The session contains these claims from Souped:
 | `iat` | `number` | Issued at (Unix timestamp) |
 | `exp` | `number` | Expiration (Unix timestamp) |
 
+## Migrating from 0.2.x
+
+`0.3.0` introduces standard OIDC claim validation: the SDK now checks the `aud` and `iss` claims of every JWT it receives, on top of the existing signature + expiry checks. Two env vars become required.
+
+1. Get the audience and issuer for each project from `glaze_get_project_auth_setup` (over MCP) or the project's Auth page in the Souped dashboard.
+2. Set `SOUPED_AUDIENCE` and `SOUPED_ISSUER` in every environment (local `.env.local`, Vercel preview, Vercel production, …) **before** upgrading the dependency. The SDK throws at startup if either is missing.
+3. Bump `@souped-tools/auth-nextjs` to `^0.3.0` and redeploy.
+
+Apps that stay on `^0.2.x` are unaffected — the upgrade is opt-in.
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full list of changes.
+
 ## License
 
 MIT
