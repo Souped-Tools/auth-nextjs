@@ -6,24 +6,16 @@ export interface SoupedConfig {
   soupedUrl: string
   appId: string
   /**
-   * The expected `aud` claim in JWTs issued for this project. Get it from
-   * `glaze_get_project_auth_setup` or the Souped dashboard.
-   *
-   * Optional during the soft-rollout window: when omitted, `verifyToken`
-   * logs a one-time warning and skips audience validation. Strongly
-   * recommended — validating the audience is standard OIDC practice and
-   * will become a hard requirement in a future major release.
+   * The expected `aud` claim in JWTs issued for this project. Required.
+   * Get it from `glaze_get_project_auth_setup` or the Souped dashboard.
    */
-  audience?: string
+  audience: string
   /**
    * The expected `iss` claim in JWTs — the platform's stable identity,
-   * not the API host (`soupedUrl`). Get it from
+   * not the API host (`soupedUrl`). Required. Get it from
    * `glaze_get_project_auth_setup` or the Souped dashboard.
-   *
-   * Optional during the soft-rollout window: when omitted, `verifyToken`
-   * skips issuer validation. Will become required in a future major release.
    */
-  issuer?: string
+  issuer: string
 }
 
 export interface SoupedClaims {
@@ -49,20 +41,13 @@ export function getConfig(): SoupedConfig {
   const audience = process.env.SOUPED_AUDIENCE
   const issuer = process.env.SOUPED_ISSUER
 
-  if (!clientId || !clientSecret || !soupedUrl || !appId) {
+  if (!clientId || !clientSecret || !soupedUrl || !appId || !audience || !issuer) {
     throw new Error(
-      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, SOUPED_URL, and SOUPED_APP_ID."
+      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, SOUPED_URL, SOUPED_APP_ID, SOUPED_AUDIENCE, and SOUPED_ISSUER. Get all of them from `glaze_get_project_auth_setup` (MCP) or the Souped dashboard."
     )
   }
 
-  cachedConfig = {
-    clientId,
-    clientSecret,
-    soupedUrl,
-    appId,
-    audience: audience || undefined,
-    issuer: issuer || undefined,
-  }
+  cachedConfig = { clientId, clientSecret, soupedUrl, appId, audience, issuer }
   return cachedConfig
 }
 
@@ -193,33 +178,11 @@ export async function refreshAccessToken(
 
 // --- JWT verification ---
 
-let warnedMissingAudience = false
-let warnedMissingIssuer = false
-
 export async function verifyToken(token: string): Promise<SoupedClaims> {
   const { soupedUrl, audience, issuer } = getConfig()
-
-  if (!audience && !warnedMissingAudience) {
-    warnedMissingAudience = true
-    console.warn(
-      "@souped-tools/auth-nextjs: SOUPED_AUDIENCE is not set; `aud` claim validation skipped. " +
-        "Set it from `glaze_get_project_auth_setup` (MCP) or the Souped dashboard. " +
-        "Will become required in a future major release."
-    )
-  }
-
-  if (!issuer && !warnedMissingIssuer) {
-    warnedMissingIssuer = true
-    console.warn(
-      "@souped-tools/auth-nextjs: SOUPED_ISSUER is not set; `iss` claim validation skipped. " +
-        "Set it from `glaze_get_project_auth_setup` (MCP) or the Souped dashboard. " +
-        "Will become required in a future major release."
-    )
-  }
-
   const { payload } = await jwtVerify(token, getJWKS(soupedUrl), {
-    ...(audience ? { audience } : {}),
-    ...(issuer ? { issuer } : {}),
+    audience,
+    issuer,
   })
   return payload as unknown as SoupedClaims
 }

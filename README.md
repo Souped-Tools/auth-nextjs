@@ -48,9 +48,7 @@ SOUPED_AUDIENCE=
 SOUPED_ISSUER=
 ```
 
-`SOUPED_CLIENT_ID`, `SOUPED_CLIENT_SECRET`, `SOUPED_APP_ID`, and `SOUPED_URL` are required — the SDK throws at startup if any is missing.
-
-`SOUPED_AUDIENCE` and `SOUPED_ISSUER` are currently optional but strongly recommended — they enable standard OIDC claim validation. When either is missing, the SDK logs a one-time warning and skips that claim's check. Both will become required in a future major release.
+All six variables are required as of `0.3.0` — the SDK throws at startup if any is missing. `SOUPED_AUDIENCE` and `SOUPED_ISSUER` enable standard OIDC `aud` / `iss` claim validation.
 
 ### 4. Add the auth routes
 
