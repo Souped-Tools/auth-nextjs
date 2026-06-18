@@ -38,9 +38,19 @@ SOUPED_APP_ID=
 # value depends on the environment your Souped project lives in; get it
 # from `glaze_get_project_auth_setup` over MCP, or from the dashboard.
 SOUPED_URL=
+
+# Expected `aud` claim in issued JWTs. Get it from
+# `glaze_get_project_auth_setup` (MCP) or the Souped dashboard.
+SOUPED_AUDIENCE=
+
+# Expected `iss` claim in issued JWTs (the platform's stable identity,
+# not the API host above). Same source as SOUPED_AUDIENCE.
+SOUPED_ISSUER=
 ```
 
-All four variables are required. The SDK throws at startup if any is missing.
+`SOUPED_CLIENT_ID`, `SOUPED_CLIENT_SECRET`, `SOUPED_APP_ID`, and `SOUPED_URL` are required — the SDK throws at startup if any is missing.
+
+`SOUPED_AUDIENCE` and `SOUPED_ISSUER` are currently optional but strongly recommended — they enable standard OIDC claim validation. When either is missing, the SDK logs a one-time warning and skips that claim's check. Both will become required in a future major release.
 
 ### 4. Add the auth routes
 
