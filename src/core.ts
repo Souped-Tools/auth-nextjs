@@ -42,8 +42,24 @@ export function getConfig(): SoupedConfig {
   const issuer = process.env.SOUPED_ISSUER
 
   if (!clientId || !clientSecret || !soupedUrl || !appId || !audience || !issuer) {
+    const missing: string[] = []
+    if (!clientId) missing.push("SOUPED_CLIENT_ID")
+    if (!clientSecret) missing.push("SOUPED_CLIENT_SECRET")
+    if (!soupedUrl) missing.push("SOUPED_URL")
+    if (!appId) missing.push("SOUPED_APP_ID")
+    if (!audience) missing.push("SOUPED_AUDIENCE")
+    if (!issuer) missing.push("SOUPED_ISSUER")
+
+    // Common typo: people sometimes set SOUPED_PROJECT_ID thinking that's
+    // the name (older snippets used to spell it that way). Point them at
+    // the right name explicitly so they don't keep guessing.
+    const hint =
+      !appId && process.env.SOUPED_PROJECT_ID
+        ? " Note: you have SOUPED_PROJECT_ID set, but the SDK reads SOUPED_APP_ID — rename it."
+        : ""
+
     throw new Error(
-      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, SOUPED_URL, SOUPED_APP_ID, SOUPED_AUDIENCE, and SOUPED_ISSUER. Get all of them from `glaze_get_project_auth_setup` (MCP) or the Souped dashboard."
+      `@souped-tools/auth-nextjs: Missing env vars: ${missing.join(", ")}. Get the full set from \`glaze_get_project_auth_setup\` (MCP) or the Souped dashboard.${hint}`
     )
   }
 
