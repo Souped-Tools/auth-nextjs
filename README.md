@@ -38,9 +38,17 @@ SOUPED_APP_ID=
 # value depends on the environment your Souped project lives in; get it
 # from `glaze_get_project_auth_setup` over MCP, or from the dashboard.
 SOUPED_URL=
+
+# Expected `aud` claim in issued JWTs. Get it from
+# `glaze_get_project_auth_setup` (MCP) or the Souped dashboard.
+SOUPED_AUDIENCE=
+
+# Expected `iss` claim in issued JWTs (the platform's stable identity,
+# not the API host above). Same source as SOUPED_AUDIENCE.
+SOUPED_ISSUER=
 ```
 
-All four variables are required. The SDK throws at startup if any is missing.
+All six variables are required as of `0.3.0` — the SDK throws at startup if any is missing. `SOUPED_AUDIENCE` and `SOUPED_ISSUER` enable standard OIDC `aud` / `iss` claim validation.
 
 ### 4. Add the auth routes
 
@@ -205,6 +213,18 @@ The session contains these claims from Souped:
 | `aud` | `string \| string[]` | Audience |
 | `iat` | `number` | Issued at (Unix timestamp) |
 | `exp` | `number` | Expiration (Unix timestamp) |
+
+## Migrating from 0.2.x
+
+`0.3.0` introduces standard OIDC claim validation: the SDK now checks the `aud` and `iss` claims of every JWT it receives, on top of the existing signature + expiry checks. Two env vars become required.
+
+1. Get the audience and issuer for each project from `glaze_get_project_auth_setup` (over MCP) or the project's Auth page in the Souped dashboard.
+2. Set `SOUPED_AUDIENCE` and `SOUPED_ISSUER` in every environment (local `.env.local`, Vercel preview, Vercel production, …) **before** upgrading the dependency. The SDK throws at startup if either is missing.
+3. Bump `@souped-tools/auth-nextjs` to `^0.3.0` and redeploy.
+
+Apps that stay on `^0.2.x` are unaffected — the upgrade is opt-in.
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full list of changes.
 
 ## License
 

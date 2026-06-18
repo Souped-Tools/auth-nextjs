@@ -5,6 +5,17 @@ export interface SoupedConfig {
   clientSecret: string
   soupedUrl: string
   appId: string
+  /**
+   * The expected `aud` claim in JWTs issued for this project. Required.
+   * Get it from `glaze_get_project_auth_setup` or the Souped dashboard.
+   */
+  audience: string
+  /**
+   * The expected `iss` claim in JWTs — the platform's stable identity,
+   * not the API host (`soupedUrl`). Required. Get it from
+   * `glaze_get_project_auth_setup` or the Souped dashboard.
+   */
+  issuer: string
 }
 
 export interface SoupedClaims {
@@ -27,14 +38,32 @@ export function getConfig(): SoupedConfig {
   const clientSecret = process.env.SOUPED_CLIENT_SECRET
   const soupedUrl = process.env.SOUPED_URL
   const appId = process.env.SOUPED_APP_ID
+  const audience = process.env.SOUPED_AUDIENCE
+  const issuer = process.env.SOUPED_ISSUER
 
-  if (!clientId || !clientSecret || !soupedUrl || !appId) {
+  if (!clientId || !clientSecret || !soupedUrl || !appId || !audience || !issuer) {
+    const missing: string[] = []
+    if (!clientId) missing.push("SOUPED_CLIENT_ID")
+    if (!clientSecret) missing.push("SOUPED_CLIENT_SECRET")
+    if (!soupedUrl) missing.push("SOUPED_URL")
+    if (!appId) missing.push("SOUPED_APP_ID")
+    if (!audience) missing.push("SOUPED_AUDIENCE")
+    if (!issuer) missing.push("SOUPED_ISSUER")
+
+    // Common typo: people sometimes set SOUPED_PROJECT_ID thinking that's
+    // the name (older snippets used to spell it that way). Point them at
+    // the right name explicitly so they don't keep guessing.
+    const hint =
+      !appId && process.env.SOUPED_PROJECT_ID
+        ? " Note: you have SOUPED_PROJECT_ID set, but the SDK reads SOUPED_APP_ID — rename it."
+        : ""
+
     throw new Error(
-      "@souped-tools/auth-nextjs: Missing env vars. Set SOUPED_CLIENT_ID, SOUPED_CLIENT_SECRET, SOUPED_URL, and SOUPED_APP_ID."
+      `@souped-tools/auth-nextjs: Missing env vars: ${missing.join(", ")}. Get the full set from \`glaze_get_project_auth_setup\` (MCP) or the Souped dashboard.${hint}`
     )
   }
 
-  cachedConfig = { clientId, clientSecret, soupedUrl, appId }
+  cachedConfig = { clientId, clientSecret, soupedUrl, appId, audience, issuer }
   return cachedConfig
 }
 
@@ -166,7 +195,10 @@ export async function refreshAccessToken(
 // --- JWT verification ---
 
 export async function verifyToken(token: string): Promise<SoupedClaims> {
-  const { soupedUrl } = getConfig()
-  const { payload } = await jwtVerify(token, getJWKS(soupedUrl))
+  const { soupedUrl, audience, issuer } = getConfig()
+  const { payload } = await jwtVerify(token, getJWKS(soupedUrl), {
+    audience,
+    issuer,
+  })
   return payload as unknown as SoupedClaims
 }
