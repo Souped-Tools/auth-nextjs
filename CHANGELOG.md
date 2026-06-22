@@ -5,6 +5,15 @@ All notable changes to `@souped-tools/auth-nextjs` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-06-22
+
+### Fixed
+
+- Gate redirect now points at the service entry-point instead of the
+  themed page directly. The previous build assumed the SDK could reach
+  the gate UI under `SOUPED_URL`, which fails when the service and the
+  UI live on different origins.
+
 ## [0.4.0] - 2026-06-22
 
 ### Added
