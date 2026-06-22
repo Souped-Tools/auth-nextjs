@@ -91,9 +91,87 @@ async function handleLogout(request: Request): Promise<Response> {
   return NextResponse.redirect(new URL("/api/auth/login", request.url))
 }
 
+// Site-password gate callback. Receives `?gate_code=...&next=...` from
+// glaze-ui after a successful /verify, exchanges the code server-side for
+// the long-lived gate token, sets it as a cookie ON THE WEBAPP DOMAIN, then
+// redirects to `next`. Same pattern as handleCallback for OAuth, but for the
+// gate flow (no PKCE, no per-user identity).
+async function handleSitePasswordCallback(request: Request): Promise<Response> {
+  const config = getConfig()
+  const url = new URL(request.url)
+  const gateCode = url.searchParams.get("gate_code")
+  const next = url.searchParams.get("next") ?? "/"
+
+  if (!gateCode) {
+    return NextResponse.json({ error: "missing_gate_code" }, { status: 400 })
+  }
+
+  // Validate `next` against the current origin to block open-redirects.
+  let nextUrl: URL
+  try {
+    nextUrl = new URL(next, request.url)
+  } catch {
+    return NextResponse.json({ error: "invalid_next" }, { status: 400 })
+  }
+  if (nextUrl.origin !== url.origin) {
+    return NextResponse.json({ error: "invalid_next" }, { status: 400 })
+  }
+
+  // Exchange the gate_code for the gate_token (server-to-server to Glaze).
+  let exchangeRes: Response
+  try {
+    exchangeRes = await fetch(`${config.soupedUrl}/auth/site-password/exchange`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: config.clientId,
+        gate_code: gateCode,
+      }),
+    })
+  } catch {
+    return NextResponse.redirect(
+      new URL("/api/auth/site-password/login-failed", request.url),
+    )
+  }
+
+  if (!exchangeRes.ok) {
+    // Send the user back to the gate with a generic error param. The form
+    // page reads `?error=…` to show a themed banner.
+    const gateUrl = new URL("/site-password", config.soupedUrl)
+    gateUrl.searchParams.set("client_id", config.clientId)
+    gateUrl.searchParams.set("redirect_uri", nextUrl.toString())
+    gateUrl.searchParams.set("error", "exchange_failed")
+    return NextResponse.redirect(gateUrl)
+  }
+
+  const data = (await exchangeRes.json()) as {
+    gate_token?: string
+    maxAge?: number
+  }
+  if (!data.gate_token || typeof data.maxAge !== "number") {
+    return NextResponse.json({ error: "invalid_exchange_response" }, { status: 502 })
+  }
+
+  const response = NextResponse.redirect(nextUrl)
+  response.cookies.set("souped_site_gate", data.gate_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: data.maxAge,
+  })
+  return response
+}
+
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const path = url.pathname
+
+  // Site-password subroutes — check FIRST so the "endsWith /callback" below
+  // doesn't catch /api/auth/site-password/callback.
+  if (path.endsWith("/site-password/callback")) {
+    return handleSitePasswordCallback(request)
+  }
 
   if (path.endsWith("/login")) return handleLogin(request)
   if (path.endsWith("/callback")) return handleCallback(request)

@@ -113,6 +113,43 @@ That's it. Your app is now protected. Unauthenticated users are redirected to So
 
 ---
 
+## Public routes
+
+By default, every request that matches `config.matcher` requires a session — only `/api/auth/*` (the login flow itself) is hard-coded as public. For landing pages, marketing routes, public APIs, or webhook receivers, declare them explicitly via `publicRoutes`:
+
+```ts
+// src/proxy.ts
+import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
+import { NextResponse } from "next/server"
+
+export const proxy = withSoupedAuth(
+  {
+    publicRoutes: ["/", "/pricing", "/blog/:slug*", "/api/webhooks/:path*"],
+  },
+  () => NextResponse.next(),
+)
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+}
+```
+
+Patterns support Next.js matcher syntax: `:name`, `:name*`, `:name+`. Webhook routes are a common gotcha — Stripe/Resend/etc. hit them without a session, so list them explicitly or they'll redirect to login and fail.
+
+Added in `0.4.0`. Backward-compatible with the previous `withSoupedAuth(handler)` signature.
+
+## Site-password gate (optional)
+
+Souped projects can optionally enable a shared password (like Vercel's Password Protection) that tapas the entire site before any rendering. It's orthogonal to OAuth — you can use both, only one, or neither. Useful for pre-prod sites, demos, and staging shared with clients.
+
+Activation is owner-controlled from the Souped dashboard (or `glaze_set_site_password` via MCP) and requires Spark + a linked Vercel project. The SDK reads `process.env.SOUPED_SITE_GATE_ENABLED` at boot — no code changes needed. The env var is pushed automatically by Souped on toggle, and a redeploy is triggered as part of the same call.
+
+For full site coverage when the gate is on, the middleware matcher needs to be wide (`["/((?!_next/static|_next/image|favicon.ico).*)"]`) — the recommended default. Narrow matchers leave the routes they don't cover ungated; the SDK logs a warning at boot when the gate is enabled to nudge devs in the right direction.
+
+Apps scaffolded with `souped-boilerplate` ≥ v0.4 ship a wide matcher + `publicRoutes: ["/"]` out of the box.
+
+---
+
 ## Reading the session
 
 ### Server components
