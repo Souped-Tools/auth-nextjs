@@ -113,6 +113,33 @@ That's it. Your app is now protected. Unauthenticated users are redirected to So
 
 ---
 
+## Public routes
+
+By default, every request that matches `config.matcher` requires a session — only `/api/auth/*` (the login flow itself) is hard-coded as public. For landing pages, marketing routes, public APIs, or webhook receivers, declare them explicitly via `publicRoutes`:
+
+```ts
+// src/proxy.ts
+import { withSoupedAuth } from "@souped-tools/auth-nextjs/proxy"
+import { NextResponse } from "next/server"
+
+export const proxy = withSoupedAuth(
+  {
+    publicRoutes: ["/", "/pricing", "/blog/:slug*", "/api/webhooks/:path*"],
+  },
+  () => NextResponse.next(),
+)
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+}
+```
+
+Patterns support Next.js matcher syntax: `:name`, `:name*`, `:name+`. Webhook routes are a common gotcha — Stripe/Resend/etc. hit them without a session, so list them explicitly or they'll redirect to login and fail.
+
+Added in `0.4.0`. Backward-compatible with the previous `withSoupedAuth(handler)` signature.
+
+---
+
 ## Reading the session
 
 ### Server components

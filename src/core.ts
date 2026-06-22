@@ -69,7 +69,7 @@ export function getConfig(): SoupedConfig {
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | null = null
 
-function getJWKS(soupedUrl: string) {
+export function getJWKS(soupedUrl: string) {
   if (!jwks) {
     jwks = createRemoteJWKSet(new URL(`${soupedUrl}/.well-known/jwks.json`))
   }
