@@ -137,9 +137,9 @@ async function handleSitePasswordCallback(request: Request): Promise<Response> {
   }
 
   if (!exchangeRes.ok) {
-    // Send the user back to the gate with a generic error param. The form
-    // page reads `?error=…` to show a themed banner.
-    const gateUrl = new URL("/site-password", config.soupedUrl)
+    // Send the user back to the gate (via the service entry-point) with a
+    // generic error param. The form page reads `?error=…` to show a banner.
+    const gateUrl = new URL("/auth/site-password/start", config.soupedUrl)
     gateUrl.searchParams.set("client_id", config.clientId)
     gateUrl.searchParams.set("redirect_uri", nextUrl.toString())
     gateUrl.searchParams.set("error", "exchange_failed")

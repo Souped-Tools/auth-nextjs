@@ -143,7 +143,9 @@ async function tryAuth(
 
 function redirectToGate(request: NextRequest): NextResponse {
   const config = getConfig()
-  const gateUrl = new URL("/site-password", config.soupedUrl)
+  // Hit the service entry-point, which validates inputs and forwards to
+  // the themed gate page. Same indirection the OAuth flow uses for /login.
+  const gateUrl = new URL("/auth/site-password/start", config.soupedUrl)
   gateUrl.searchParams.set("client_id", config.clientId)
   gateUrl.searchParams.set(
     "redirect_uri",
