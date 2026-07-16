@@ -140,6 +140,19 @@ Added in `0.4.0`. Backward-compatible with the previous `withSoupedAuth(handler)
 
 ---
 
+## Post-login redirect (`return_to`)
+
+After login, the callback redirects to the `return_to` captured when login started, falling back to `/` when none was captured. When the proxy redirects an unauthenticated request to `/api/auth/login`, it appends `?return_to=<original path>` automatically; you can also pass it yourself: `/api/auth/login?return_to=/app`.
+
+**Footgun:** a bare `<a href="/api/auth/login">` link on a public landing logs the user in and drops them right back on `/` — the landing they started from. The session exists, but it reads as "login didn't work". Two ways to avoid it:
+
+- **Preferred:** point login CTAs at the gated route itself (`<a href="/app">`). The proxy bounces through login with `return_to` set automatically, and already-authenticated users skip the login round-trip entirely.
+- Or pass it explicitly: `<a href="/api/auth/login?return_to=/app">`.
+
+`return_to` only accepts same-origin paths — absolute or protocol-relative URLs pointing off-site are ignored (open-redirect protection), falling back to `/`.
+
+---
+
 ## Reading the session
 
 ### Server components

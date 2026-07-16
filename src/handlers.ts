@@ -20,6 +20,22 @@ const COOKIE_OPTIONS = {
   path: "/",
 }
 
+// Resolve a return_to value against the current origin and reject anything
+// that lands off-site (absolute URLs, protocol-relative and backslash
+// variants). Same guard as the site-password `next` param. Returns the
+// resolved same-origin URL, or null if the value is missing or unsafe.
+function safeReturnUrl(value: string | null | undefined, requestUrl: string): URL | null {
+  if (!value) return null
+  let resolved: URL
+  try {
+    resolved = new URL(value, requestUrl)
+  } catch {
+    return null
+  }
+  if (resolved.origin !== new URL(requestUrl).origin) return null
+  return resolved
+}
+
 async function handleLogin(request: Request): Promise<Response> {
   const config = getConfig()
   const { verifier, challenge } = await generatePKCE()
@@ -29,10 +45,15 @@ async function handleLogin(request: Request): Promise<Response> {
 
   const cookieStore = await cookies()
 
-  // Save the URL the user came from so we can redirect back after login
-  const returnTo = new URL(request.url).searchParams.get("return_to")
+  // Save the URL the user came from so we can redirect back after login.
+  // Only same-origin values are kept; anything that resolves off-site is
+  // dropped here and re-checked at redirect time in handleCallback.
+  const returnTo = safeReturnUrl(
+    new URL(request.url).searchParams.get("return_to"),
+    request.url,
+  )
   if (returnTo) {
-    cookieStore.set("souped_return_to", returnTo, {
+    cookieStore.set("souped_return_to", returnTo.pathname + returnTo.search + returnTo.hash, {
       ...COOKIE_OPTIONS,
       maxAge: 600,
     })
@@ -77,8 +98,15 @@ async function handleCallback(request: Request): Promise<Response> {
       maxAge: 90 * 24 * 60 * 60, // 90 days (matches Souped refresh token TTL)
     })
 
-    const destination = returnTo || "/"
-    return NextResponse.redirect(new URL(destination, request.url))
+    // Validate again at use time (defense in depth — the cookie is ours, but
+    // cheap to re-check). Note the "/" fallback is usually the PUBLIC
+    // landing: a login started without return_to drops the user back where
+    // they came from, which reads as "login didn't work". Login links should
+    // point at a gated route (the proxy fills return_to) or carry
+    // ?return_to= explicitly — see "Post-login redirect" in the README.
+    const destination =
+      safeReturnUrl(returnTo, request.url) ?? new URL("/", request.url)
+    return NextResponse.redirect(destination)
   } catch {
     return NextResponse.redirect(new URL("/api/auth/login", request.url))
   }
