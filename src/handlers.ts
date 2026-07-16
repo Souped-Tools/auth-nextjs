@@ -99,15 +99,13 @@ async function handleCallback(request: Request): Promise<Response> {
     })
 
     // Validate again at use time (defense in depth — the cookie is ours, but
-    // cheap to re-check). Fallback order: return_to → configured post-login
-    // default → "/". Note "/" is usually the PUBLIC landing: a login started
-    // without return_to drops the user back where they came from, which reads
-    // as "login didn't work". Set SOUPED_POST_LOGIN_REDIRECT to the app's
-    // gated entry route (e.g. /app) to make that case land somewhere useful.
+    // cheap to re-check). Note the "/" fallback is usually the PUBLIC
+    // landing: a login started without return_to drops the user back where
+    // they came from, which reads as "login didn't work". Login links should
+    // point at a gated route (the proxy fills return_to) or carry
+    // ?return_to= explicitly — see "Post-login redirect" in the README.
     const destination =
-      safeReturnUrl(returnTo, request.url) ??
-      safeReturnUrl(config.postLoginRedirect, request.url) ??
-      new URL("/", request.url)
+      safeReturnUrl(returnTo, request.url) ?? new URL("/", request.url)
     return NextResponse.redirect(destination)
   } catch {
     return NextResponse.redirect(new URL("/api/auth/login", request.url))
