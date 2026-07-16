@@ -5,6 +5,26 @@ All notable changes to `@souped-tools/auth-nextjs` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-16
+
+### Added
+
+- **`SOUPED_POST_LOGIN_REDIRECT`** (optional env var, `postLoginRedirect`
+  in `SoupedConfig`): where the callback redirects after login when no
+  `return_to` was captured. Defaults to `/` as before. Set it to the
+  app's gated entry route (e.g. `/app`) so a login started from a bare
+  `/api/auth/login` link doesn't drop the user back on the public
+  landing — the session was created, but landing on `/` reads as
+  "login didn't work".
+
+### Security
+
+- **`return_to` values are now validated to be same-origin** — checked
+  in `handleLogin` before the cookie is stored and again in
+  `handleCallback` before the redirect. Values that resolve outside the
+  app's origin are ignored and fall through to
+  `SOUPED_POST_LOGIN_REDIRECT` / `/`. Upgrading is recommended.
+
 ## [0.4.1] - 2026-06-22
 
 ### Fixed

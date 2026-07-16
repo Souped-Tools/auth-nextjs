@@ -16,6 +16,14 @@ export interface SoupedConfig {
    * `glaze_get_project_auth_setup` or the Souped dashboard.
    */
   issuer: string
+  /**
+   * Where the callback redirects after login when no `return_to` was
+   * captured. Optional (`SOUPED_POST_LOGIN_REDIRECT`); defaults to `/`.
+   * Set it to the app's gated entry route (e.g. `/app`) so a login started
+   * without `return_to` doesn't drop the user back on the public landing.
+   * Must be a same-origin path — off-site values are ignored.
+   */
+  postLoginRedirect?: string
 }
 
 export interface SoupedClaims {
@@ -63,7 +71,15 @@ export function getConfig(): SoupedConfig {
     )
   }
 
-  cachedConfig = { clientId, clientSecret, soupedUrl, appId, audience, issuer }
+  cachedConfig = {
+    clientId,
+    clientSecret,
+    soupedUrl,
+    appId,
+    audience,
+    issuer,
+    postLoginRedirect: process.env.SOUPED_POST_LOGIN_REDIRECT,
+  }
   return cachedConfig
 }
 

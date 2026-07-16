@@ -46,9 +46,13 @@ SOUPED_AUDIENCE=
 # Expected `iss` claim in issued JWTs (the platform's stable identity,
 # not the API host above). Same source as SOUPED_AUDIENCE.
 SOUPED_ISSUER=
+
+# Optional. Where the callback redirects after login when no `return_to`
+# was captured (defaults to "/"). Set it to your app's gated entry route.
+SOUPED_POST_LOGIN_REDIRECT=/app
 ```
 
-All six variables are required as of `0.3.0` — the SDK throws at startup if any is missing. `SOUPED_AUDIENCE` and `SOUPED_ISSUER` enable standard OIDC `aud` / `iss` claim validation.
+All six variables (everything except `SOUPED_POST_LOGIN_REDIRECT`) are required as of `0.3.0` — the SDK throws at startup if any is missing. `SOUPED_AUDIENCE` and `SOUPED_ISSUER` enable standard OIDC `aud` / `iss` claim validation.
 
 ### 4. Add the auth routes
 
@@ -137,6 +141,23 @@ export const config = {
 Patterns support Next.js matcher syntax: `:name`, `:name*`, `:name+`. Webhook routes are a common gotcha — Stripe/Resend/etc. hit them without a session, so list them explicitly or they'll redirect to login and fail.
 
 Added in `0.4.0`. Backward-compatible with the previous `withSoupedAuth(handler)` signature.
+
+---
+
+## Post-login redirect (`return_to`)
+
+Where a user lands after logging in is decided in this order:
+
+1. **`return_to`** — when the proxy redirects an unauthenticated request to `/api/auth/login`, it appends `?return_to=<original path>`; the callback sends the user back there. You can also pass it yourself: `/api/auth/login?return_to=/app`.
+2. **`SOUPED_POST_LOGIN_REDIRECT`** — optional env var used when no `return_to` was captured.
+3. **`/`** — the final fallback.
+
+**Footgun:** a bare `<a href="/api/auth/login">` link on a public landing logs the user in and drops them right back on `/` — the landing they started from. The session exists, but it reads as "login didn't work". Two ways to avoid it:
+
+- **Preferred:** point login CTAs at the gated route itself (`<a href="/app">`). The proxy bounces through login with `return_to` set automatically, and already-authenticated users skip the login round-trip entirely.
+- Or pass it explicitly: `<a href="/api/auth/login?return_to=/app">`, and/or set `SOUPED_POST_LOGIN_REDIRECT=/app` as a safety net.
+
+`return_to` only accepts same-origin paths — absolute or protocol-relative URLs pointing off-site are ignored (open-redirect protection), falling through to the next option in the list.
 
 ---
 
